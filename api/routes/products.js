@@ -36,7 +36,7 @@ router.post('/', (req, res, next) => { // /products is defined in App.js so this
         name: req.body.name,
         price: req.body.price
     });
-    product.save().then(reseult => { //use mongoose .save method to store in database, chain with .then method with arrow function for the result
+    product.save().then(result => { //use mongoose .save method to store in database, chain with .then method with arrow function for the result
         console.log(result);
     }) 
     .catch(err => console.log(err)); //chain .catch method to catch error and display in the log
