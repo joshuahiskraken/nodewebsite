@@ -45,9 +45,7 @@ app.use((error, req, res, next) => { //handles all kinds of errors, like above a
 });
 
 //Connect to the Mongo Atlas database using mongoose database driver for nodejs, Create and env for the PW to the database store in nodemon.json
-mongoose.connect('mongodb+srv://Gh0xst:' + process.env.MONGO_ATLAS_PW + '@cluster0-q0al3.mongodb.net/test?retryWrites=true', {
-    useMongoClient: true
-});
+mongoose.connect('mongodb+srv://Gh0xst:W1a0N!202@cluster0-q0al3.mongodb.net/test?retryWrites=true');
 
 
 module.exports = app;

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router(); // import express router to manager routes
+const mongoose = require('mongoose');
 
 const Product = require('../models/product'); //import Product object with the model in api/models/
 
@@ -29,11 +30,16 @@ if (id === 'special') {
 
 //Handle incoming POST req
 router.post('/', (req, res, next) => { // /products is defined in App.js so this only needs to be root instead of /products
-    const product = { //create object with name property, name property should be coming from a req and located in body same with price
+    //create new product from mongoose import
+    const product = new Product({
+        _id: new mongoose.Types.ObjectId(), //mongoose automatically create new Id randomized
         name: req.body.name,
         price: req.body.price
-    };
-    
+    });
+    product.save().then(reseult => { //use mongoose .save method to store in database, chain with .then method with arrow function for the result
+        console.log(result);
+    }) 
+    .catch(err => console.log(err)); //chain .catch method to catch error and display in the log
     res.status(201).json({
         message: 'Products.js Handling POST req to /products',
         createdProduct: product   //pass the product back with the message
