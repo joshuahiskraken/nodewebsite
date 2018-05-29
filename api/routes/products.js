@@ -75,22 +75,31 @@ router.post('/', (req, res, next) => { // /products is defined in App.js so this
 });
 
 //Handle incoming PATCH req
-router.patch('/:productId', (req, res, next) => { //works same as delete
-    const id = req.params.productId; 
-    Product.findByIdAndUpdate(id)
-    .exec()
-    .then(result => {
-        res.status(201).json(result);
-        
-    })
-    .catch(err => {
+router.patch("/:productId", (req, res, next) => {
+    const id = req.params.productId;
+    const updateOps = {};
+    for (const ops of req.body) {
+      updateOps[ops.propName] = ops.value;
+    }
+    Product.findByIdAndUpdate(id, { $set: updateOps })  
+      .exec()
+      .then(result => {
+        console.log(result);
+        res.status(200).json(result);
+      })
+      .catch(err => {
         console.log(err);
         res.status(500).json({
-            error: err
+          error: err
         });
-    });
-});
-
+      });
+  });
+/* send the new value of the property "name"
+[
+	{"propName": "name" , "value": "newname"}
+	
+	]
+*/
 //Handle incoming DELETE req
 router.delete('/:productId', (req, res, next) => { 
    const id = req.params.productId; //give id object the params in the url /:productId 
