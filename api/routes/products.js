@@ -2,16 +2,33 @@ const express = require('express');
 const router = express.Router(); // import express router to manager routes
 const mongoose = require('mongoose');
 
-const Product = require('../models/product'); //import Product object with the model in api/models/
+const Product = require('../models/product'); //import Product object with the model in api/models/product.js
 
+//import server from index so we can use dynamic host and port in the link to individual products
+//var server = require('../index');
+//var host = server.address().address;
+ //var port = server.address().port;
 
 
 //Handle incoming GET req
 router.get('/', (req, res, next) => { // /products is defined in App.js so this only needs to be root
-    Product.find().exec().then(docs => { //products should return all products. where docs means all products. 
-        console.log(docs); //log all products
+    Product.find().select('name price _id').exec().then(docs => { //products should return all products. where docs means all products. 
+        const prodresponse = { //create an object to show number of products
+            count: docs.length,
+            products: docs.map(doc => { //return a mapped array with the below meta data, including the url to the individual object
+                return {
+                    name: doc.name,
+                    price: doc.price,
+                    _id: doc._id,
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:8080/products/'+ doc._id  //need to fix need to get dynamic server addr instead of hard coding
+                    }
+                }
+            })
+        }; //log all products
     if (docs.length >= 0) {   //If else statement is optional, otherwise it just returns an empty array if nothing is found 
-        res.status(200).json(docs); //produce all products in json format
+        res.status(200).json(prodresponse); //produce all products in json format
     } else {
         res.status(404).json({
             message: 'No products found'
@@ -62,13 +79,17 @@ router.post('/', (req, res, next) => { // /products is defined in App.js so this
             res.status(201).json({
         
             message: 'Products.js Handling POST req to /products',
-            createdProduct: result   //pass the product back with the message
-        }) 
+            createdProduct: {
+                name: result.name,
+                price: result.price,
+                _id: result._id
+            } //pass the product back with the message
+        })
             .catch(err => {
                 console.log(err);
                 res.status(500).json({
                  error: err
-                });
+                })
             }); //chain .catch method to catch error and display in the log
     
     });
