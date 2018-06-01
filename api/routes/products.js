@@ -47,11 +47,19 @@ router.get('/', (req, res, next) => { // /products is defined in App.js so this 
 router.get('/:productId', (req, res, next) => { 
     const id = req.params.productId;
     Product.findById(id)
+    .select('name price _id')
     .exec()
     .then(doc => {  //use then method to get the document and log it to the console
         console.log('From Database', doc);
     if (doc) {    
-        res.status(200).json(doc); //if there was no error then res the doc in json
+        res.status(200).json({
+            product: doc,
+            request: {
+                type: 'GET',
+                description: 'Get all products',
+                url: 'http://localhost:8080/products'
+            }
+        }); //if there was no error then res the doc in json
     } else {
         res.status(404).json({message: 'No valid entry found 404'}); // for invalid ID returns    
     }
@@ -72,26 +80,26 @@ router.post('/', (req, res, next) => { // /products is defined in App.js so this
         price: req.body.price
     });
     
-    product
-        .save()
-        .then(result => { //use mongoose .save method to store in database, chain with .then method with arrow function for the result
+    product.save().then(result => { //use mongoose .save method to store in database, chain with .then method with arrow function for the result
             console.log(result);
             res.status(201).json({
-        
             message: 'Products.js Handling POST req to /products',
-            createdProduct: {
+            createdProduct: {               //restructured the result when returning data of new product back
                 name: result.name,
                 price: result.price,
-                _id: result._id
+                _id: result._id,
+                request: {          //produce a request for the product individual url
+                    type: 'GET',
+                    url: 'http://localhost:8080/products/' + result._id
+                }
             } //pass the product back with the message
-        })
-            .catch(err => {
+        }) 
+        .catch(err => {
                 console.log(err);
                 res.status(500).json({
                  error: err
-                })
+                });
             }); //chain .catch method to catch error and display in the log
-    
     });
 });
 
