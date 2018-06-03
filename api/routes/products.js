@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router(); // import express router to manager routes
 const mongoose = require('mongoose');
-
+require('dotenv').config();
 const Product = require('../models/product'); //import Product object with the model in api/models/product.js
 
 //import server from index so we can use dynamic host and port in the link to individual products
@@ -22,7 +22,7 @@ router.get('/', (req, res, next) => { // /products is defined in App.js so this 
                     _id: doc._id,
                     request: {
                         type: 'GET',
-                        url: 'http://localhost:8080/products/'+ doc._id  //need to fix need to get dynamic server addr instead of hard coding
+                        url: process.env.prodHOST + doc._id  //need to fix need to get dynamic server addr instead of hard coding
                     }
                 }
             })
@@ -57,7 +57,7 @@ router.get('/:productId', (req, res, next) => {
             request: {
                 type: 'GET',
                 description: 'Get all products',
-                url: 'http://localhost:8080/products'
+                url: process.env.prodHOST
             }
         }); //if there was no error then res the doc in json
     } else {
@@ -90,7 +90,7 @@ router.post('/', (req, res, next) => { // /products is defined in App.js so this
                 _id: result._id,
                 request: {          //produce a request for the product individual url
                     type: 'GET',
-                    url: 'http://localhost:8080/products/' + result._id
+                    url: process.env.prodHOST + result._id
                 }
             } //pass the product back with the message
         }) 
@@ -113,8 +113,13 @@ router.patch("/:productId", (req, res, next) => {
     Product.findByIdAndUpdate(id, { $set: updateOps })  
       .exec()
       .then(result => {
-        console.log(result);
-        res.status(200).json(result);
+        res.status(200).json({
+            message: 'Product created!',
+            request: {
+                type: 'GET',
+                url: process.env.prodHOST + result._id
+            }
+        });
       })
       .catch(err => {
         console.log(err);
@@ -135,7 +140,15 @@ router.delete('/:productId', (req, res, next) => {
    Product.findByIdAndDelete(id) // Self explainatory 
    .exec()
    .then(result => {
-       res.status(200).json(result); // return as json
+       res.status(200).json({
+           message: 'Product deleted',
+           request: {
+               type: 'POST',
+               description: 'Click the link to post again',
+               url: process.env.prodHOST + result._id,
+               body: {name: 'String', price: 'Number'}
+           }
+       }); // return as json
    })
    .catch(err => {       
        console.log(err);

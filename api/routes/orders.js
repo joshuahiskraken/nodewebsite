@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-
+const mongoose = require('mongoose');
+const Order = require('../models/order');
+require('dotenv').config();
 
 //handle incoming GET req,
 router.get('/', (req, res, next) => {
@@ -18,15 +20,21 @@ router.get('/:orderId', (req, res, next) => {
 
 //handle POST req,
 router.post('/', (req, res, next) => {
-    const order = {
-        productId: req.body.productId,
-        quantity: req.body.quantity
-    };
-    res.status(201).json({
-        message: 'POST orders have been created',
-        order: order
+    const order = new Order({
+        _id: mongoose.Types.ObjectId,
+        quantity: req.body.quantity,
+        productKey: req.body.productId
     });
+    //chain save to save in the database  then to send result and status code to log and catch for errs only use exec with things like find
+    order.save().then(result => {
+        console.log(result);
+        res.status(201).json(result).catch(err => {
+        console.log(err);
+        error: err
+       }); 
+    });  
 });
+
 
 //handle DELETE req,
 router.delete('/:orderId', (req, res, next) => {
