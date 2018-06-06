@@ -24,6 +24,9 @@ app.use((req, res, next) => {
     next(); // return next so that way the other routes can take over if about doesn't return
 });
 
+app.use(express.static('uploads')); // Create a static public folder for the upoloads so we can go to HOST:PORT/file.path
+
+
     //first is the filter   //
 app.use('/products', productRoutes); //Tell the app.use to handle anything with /products by using productRoutes
 //app.use sends req to product.js that handles '/' so we can split route handling among many modules 

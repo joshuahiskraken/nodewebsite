@@ -3,6 +3,25 @@ const router = express.Router(); // import express router to manager routes
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Product = require('../models/product'); //import Product object with the model in api/models/product.js
+const multer = require('multer');// use multer to handle form requests and file uploadsnodemo
+const storage = multer.diskStorage({        // create our own storage parameters to apply to multer(); setting dest: and changing the filename and format 
+    destination: function(req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+    }
+});
+//reject a file using mimetype(format) with cb(err, false) cb(null, true): False will reject and throw err True: will allow upload
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/jpeg'|| file.mimetype === 'image/png' || file.mimetype === 'image/gif' || file.mimetype === 'video/mp4' || file.mimetype === 'video/webm') {
+    cb(null, true);
+} else {
+    cb(new Error('invalid File type'), false);    
+    }
+};
+const upload = multer({storage: storage, fileFilter: fileFilter}); //create a new object initializing multer with config data limits: {fileSize: 1024 * 1024 * 5} for 5mb upload restriction 
+
 
 //import server from index so we can use dynamic host and port in the link to individual products
 //var server = require('../index');
@@ -12,12 +31,13 @@ const Product = require('../models/product'); //import Product object with the m
 
 //Handle incoming GET req
 router.get('/', (req, res, next) => { // /products is defined in App.js so this only needs to be root
-    Product.find().select('name price _id').exec().then(docs => { //products should return all products. where docs means all products. 
+    Product.find().select('name price _id productImage').exec().then(docs => { //products should return all products. where docs means all products. Select(Properties separated with spaces)
         const prodresponse = { //create an object to show number of products
             count: docs.length,
             products: docs.map(doc => { //return a mapped array with the below meta data, including the url to the individual object
                 return {
                     name: doc.name,
+                    productImage: doc.productImage,
                     price: doc.price,
                     _id: doc._id,
                     request: {
@@ -47,13 +67,18 @@ router.get('/', (req, res, next) => { // /products is defined in App.js so this 
 router.get('/:productId', (req, res, next) => { 
     const id = req.params.productId;
     Product.findById(id)
-    .select('name price _id')
+    .select('name price _id productImage')
     .exec()
     .then(doc => {  //use then method to get the document and log it to the console
         console.log('From Database', doc);
     if (doc) {    
         res.status(200).json({
             product: doc,
+            request: {
+                type: 'GET',
+                description: 'View image',
+                url: process.env.prodHOST + doc.productImage
+            },
             request: {
                 type: 'GET',
                 description: 'Get all products',
@@ -71,13 +96,15 @@ router.get('/:productId', (req, res, next) => {
     });
 });
 
-//Handle incoming POST req
-router.post('/', (req, res, next) => { // /products is defined in App.js so this only needs to be root instead of /products
-    //create new product from mongoose import
+//Handle incoming POST req  single('name of the field that will contain upload')
+router.post('/', upload.single('productImage') ,(req, res, next) => { // pass as many handlers as you'd like separated by , they run in order
+        console.log(req.file); //req.file available by multer    
+//create new product from mongoose import
     const product = new Product({
         _id: new mongoose.Types.ObjectId(), //mongoose automatically create new Id randomized
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path //Storing the file 'path' in the database because it contains the file name
     });
     
     product.save().then(result => { //use mongoose .save method to store in database, chain with .then method with arrow function for the result
