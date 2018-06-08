@@ -2,7 +2,9 @@
 const mongoose = require('mongoose');
 const productSchema = mongoose.Schema({ //create the product schema
     _id: mongoose.Schema.Types.ObjectId, // select the Type of ID for product
-    name: {type: String, required: true }, // products show have names that must be a String and is required
+    name: {type: String, 
+        required: true,
+     }, // products show have names that must be a String and is required
     price: {type: Number, required: true}, // and a price property that is a number type and is required 
     productImage: {type: String, required: true} //Create a product image property so when we GET a product it comes with an image file associated 
 });
