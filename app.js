@@ -15,8 +15,8 @@ app.use(bodyParser.json()); //parses json to make it readable
 app.use(express.static('uploads'));
 //Prevent CORS Errors
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*'); //Response header origin, origin URL set to any *
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorizations'); //Response header type, listed or any with *
+    res.header('Access-Control-Allow-Origin','*'); //Response header origin, origin URL set to any *
+    res.header('Access-Control-Allow-Headers', '*'); //Response header type, listed or any with *
 
     if (req.method === 'OPTIONS') { // if incoming req method is equal to OPTIONS(browsers always send options req when POST,GET,PUT, etc) Also add additional header to sell browser what it CAN send.
         res.header('Access-Control-Allow-Methods', "PUT, POST, PATCH, DELETE, GET"); //http word requests you want to allow

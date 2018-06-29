@@ -1,6 +1,6 @@
 const http = require('http');
 const app = require('./app');
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 const server = http.createServer(app); //Don't need to create server when app is the express server
 server.listen(port, () => console.log(`Listening on port ${port}` ));
 
